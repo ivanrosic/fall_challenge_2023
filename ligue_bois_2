@@ -1,0 +1,290 @@
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct crea
+{
+    int id;
+    int color;
+    int type;
+    int mscan; // 1 oui 0 non
+    int yscan;
+
+    int x;
+    int y;
+    int vx;
+    int vy;
+    int dist;
+};
+struct mydrone
+{
+    int score;
+    int scan;
+    int drone_id;
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    int count;
+    int start_x;
+    int start_y;
+    char s;
+
+    int target_dist;
+    int target_x;
+    int target_y;
+    int target;
+    int step;
+    int index;
+};
+struct yourdrone
+{
+    int score;
+    int scan;
+    int drone_id;
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    int count;
+};
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+
+int main()
+{
+    struct crea c[12];
+    struct mydrone m;
+    struct yourdrone y;
+    m.index = 0;
+    m.step = 0;
+    m.start_x = 0;
+    m.start_y = 0;
+    int creature_count;
+    scanf("%d", &creature_count);
+    for (int i = 0; i < creature_count; i++)
+    {
+        scanf("%d%d%d", &c[i].id, &c[i].color, &c[i].type);
+        c[i].mscan = 0;
+        c[i].yscan = 0;
+        // fprintf(stderr, "%d%d%d\n", c[i].id, c[i].color, c[i].type);
+    }
+    // game loop
+    while (1)
+    {
+        m.target = -1;
+        m.target_dist = 20000;
+        scanf("%d", &m.score);
+        scanf("%d", &y.score);
+        scanf("%d", &m.scan);
+        for (int i = 0; i < m.scan; i++)
+        {
+            int creature_id;
+            scanf("%d", &creature_id);
+            c[creature_id - 2].mscan = 1;
+        }
+        scanf("%d", &y.scan);
+        for (int i = 0; i < y.scan; i++)
+        {
+            int creature_id;
+            scanf("%d", &creature_id);
+            c[creature_id - 2].yscan = 1;
+        }
+        scanf("%d", &m.count);
+        for (int i = 0; i < m.count; i++)
+        {
+            scanf("%d%d%d%d%d", &m.drone_id, &m.drone_x, &m.drone_y, &m.emergency,
+                  &m.battery);
+        }
+        if (m.start_x == 0 && m.start_y == 0)
+        {
+            m.start_x = m.drone_x;
+            m.start_y = m.drone_y;
+            if (m.start_x > 4500)
+                m.s = 'd';
+            else
+                m.s = 'g';
+        }
+        scanf("%d", &y.count);
+        for (int i = 0; i < y.count; i++)
+        {
+            scanf("%d%d%d%d%d", &y.drone_id, &y.drone_x, &y.drone_y, &y.emergency,
+                  &y.battery);
+        }
+
+        int drone_scan_count;
+        scanf("%d", &drone_scan_count);
+        for (int i = 0; i < drone_scan_count; i++)
+        {
+            int drone_id;
+            int creature_id;
+            scanf("%d%d", &drone_id, &creature_id);
+            // fprintf(stderr, "drone_id=[%d]\n",drone_id);
+            // fprintf(stderr, "creature_id=[%d]\n\n",creature_id);
+        }
+        int visible_creature_count;
+        scanf("%d", &visible_creature_count);
+        for (int i = 0; i < visible_creature_count; i++)
+        {
+            int creature_id;
+            double dist;
+            scanf("%d", &creature_id);
+            scanf("%d%d%d%d", &c[creature_id - 2].x, &c[creature_id - 2].y,
+                  &c[creature_id - 2].vx, &c[creature_id - 2].vy);
+            dist = sqrt((pow(((double)c[creature_id - 2].x - (double)m.drone_x), 2)) +
+                        (pow(((double)c[creature_id - 2].y - (double)m.drone_y), 2)));
+            // AB = sqrt((c.x - m.x)~ +(c.y - m.y)~);  ~=au carré
+            //(c.x - m.x)~ = pow((c[creature_id-2].x - m.x), 2);
+            //(c.y - m.y)~ = pow((c[creature_id-2].y - m.y), 2);
+            c[creature_id - 2].dist = (int)dist;
+            if (c[creature_id - 2].dist < m.target_dist &&
+                c[creature_id - 2].mscan == 0)
+            {
+                m.target = 1;
+                m.target_x = c[creature_id - 2].x;
+                m.target_y = c[creature_id - 2].y;
+                m.target_dist = c[creature_id - 2].dist;
+            }
+        }
+        int radar_blip_count;
+        scanf("%d", &radar_blip_count);
+        for (int i = 0; i < radar_blip_count; i++)
+        {
+            int drone_id;
+            int creature_id;
+            char radar[3];
+            scanf("%d%d%s", &drone_id, &creature_id, radar);
+        }
+        for (int i = 0; i < m.count; i++)
+        {
+
+            m.index++;
+            int l = m.index % 2;
+
+           // fprintf(stderr, "myscan=[%d]\n", m.scan);
+           // fprintf(stderr, "l=[%d]\n", l);
+            // Write an action using printf(). DON'T FORGET THE TRAILING \n
+            // To debug: fprintf(stderr, "Debug messages...\n");
+             /*int j = 0;
+             while(j != 11)
+             {
+                 fprintf(stderr, "struct crea [%d]\n",j);
+                 fprintf(stderr, "id=[%d]\n",c[j].id);
+                 fprintf(stderr, "color=[%d]\n",c[j].color);
+                 fprintf(stderr, "type=[%d]\n",c[j].type);
+                 fprintf(stderr, "mscan=[%d]\n",c[j].mscan);
+                 fprintf(stderr, "yscan=[%d]\n\n",c[j].yscan);
+
+                 fprintf(stderr, "x=[%d]\n",c[j].x);
+                 fprintf(stderr, "y=[%d]\n",c[j].y);
+                 fprintf(stderr, "vx=[%d]\n",c[j].vx);
+                 fprintf(stderr, "vy=[%d]\n\n",c[j].vy);
+                 fprintf(stderr, "dist=[%d]\n\n",c[j].dist);
+                 j++;
+             }*/
+            // printf("MOVE %d %d %d\n",1000, 9000, l);
+            if (m.step == 0 && m.drone_y == 9000)
+                m.step = 1;
+            else if (m.step == 1)
+            {
+                if (m.drone_x == 1000 && m.s == 'g')
+                    m.step = 2;
+                else if (m.drone_x == 9000 && m.s == 'd')
+                    m.step = 2;
+            }
+            else if (m.step == 2 && m.drone_y == 6300)
+                m.step = 3;
+            else if (m.step == 3)
+            {
+                if (m.drone_x == 9000 && m.s == 'g')
+                    m.step = 4;
+                else if (m.drone_x == 1000 && m.s == 'd')
+                    m.step = 4;
+            }
+            else if (m.step == 4 && m.drone_y == 3600)
+                m.step = 5;
+            else if (m.step == 5)
+            {
+                if (m.drone_x == 1000 && m.s == 'g')
+                    m.step = 6;
+                else if (m.drone_x == 9000 && m.s == 'd')
+                    m.step = 6;
+            }
+            if (m.step == 0)
+            {
+                if (m.s == 'd')
+                {
+                    printf("MOVE %d %d %d\n", 1000, 9000, l);
+                }
+                else
+                {
+                    printf("MOVE %d %d %d\n", 9000, 9000, l);
+                }
+            }
+            else if (m.step == 1)
+            {
+                if (m.s == 'g')
+                {
+                    printf("MOVE %d %d %d\n", 1000, 9000, l);
+                }
+                else
+                {
+                    printf("MOVE %d %d %d\n", 9000, 9000, l);
+                }
+            }
+            else if (m.step == 2)
+            {
+                if (m.s == 'g')
+                {
+                    printf("MOVE %d %d %d\n", 1000, 6300, l);
+                }
+                else
+                {
+                    printf("MOVE %d %d %d\n", 9000, 6300, l);
+                }
+            }
+            else if (m.step == 3)
+            {
+                if (m.s == 'g')
+                {
+                    printf("MOVE %d %d %d\n", 9000, 6300, l);
+                }
+                else
+                {
+                    printf("MOVE %d %d %d\n", 1000, 6300, l);
+                }
+            }
+            else if (m.step == 4)
+            {
+                if (m.s == 'g')
+                {
+                    printf("MOVE %d %d %d\n", 9000, 3600, l);
+                }
+                else
+                {
+                    printf("MOVE %d %d %d\n", 1000, 3600, l);
+                }
+            }
+            else if (m.step == 5)
+            {
+                if (m.s == 'g')
+                {
+                    printf("MOVE %d %d %d\n", 1000, 3600, l);
+                }
+                else
+                {
+                    printf("MOVE %d %d %d\n", 9000, 3600, l);
+                }
+            }
+            else
+            {
+                printf("MOVE %d %d %d\n", m.drone_x, 0, 0);
+            }
+        }
+    }
+
+    return 0;
+}
